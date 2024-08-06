@@ -4,21 +4,71 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { signIn,useSession,signOut } from "next-auth/react";
 import  Modal  from "react-modal";
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { HiCamera } from "react-icons/hi"
 import { AiOutlineClose } from "react-icons/ai"
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { app } from '../firebase';
 
 function Header() {
   const { data : session } = useSession()
   const [isOpen,SetIsOpen] = useState(false)
+  const [selectedFile,setSelectedFile] = useState(null)
+  const [imageFileUrl,setImageFileUrl] = useState(null)
+  const [imageFileUploading,setImageFileUploading] = useState(false)
+  const filePickerRef = useRef(null)
+  const addImageToPost = (e) =>{
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+      setImageFileUrl(URL.createObjectURL(file))
+      console.log(imageFileUrl);
+    }
+  }
+
+  useEffect(() =>{
+    if(selectedFile){
+      uploadImageToStorage()
+    }
+  },[selectedFile])
+
+  async function uploadImageToStorage() {
+    setImageFileUploading(true)
+    const storage = getStorage(app)
+    const fileName = new Date().getTime() + '-' + selectedFile.name
+    const storageRef = ref(storage,fileName)
+    const uploadTask = uploadBytesResumable(storageRef,selectedFile)
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+      },
+      (error) => {
+        console.error(error);
+        setImageFileUploading(false);
+        setImageFileUrl(null);
+        setSelectedFile(null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setImageFileUrl(downloadURL);
+          setImageFileUploading(false);
+        });
+      }
+    );
+  
+    
+  }
   return (
     <div className='shadow-sm border-b sticky
     top-0 bg-white z-30 p-3'>
       <div className='flex justify-between
       items-center max-width-6xl mx-auto'>
       {/* logo */}
-      <Link href="/" className='hidden lg:inline-flex'>
+        <Link href="/" className='hidden lg:inline-flex'>
            <Image 
             src='/Instagram_logo_black.webp'
             width={96}
@@ -52,10 +102,11 @@ function Header() {
             transform hover:scale-125 transition duration-300 hover:text-red-600'
             onClick={() => SetIsOpen(true)}
             />
-            <img src={session.user.image} 
-            alt={session.user.name}
-            className='rounded-full h-10 w-10 cursor-pointer'
-            onClick={signOut}
+            <img
+              src={session.user.image}
+              alt={session.user.name}
+              className='h-10 w-10 rounded-full cursor-pointer'
+              onClick={signOut}
             />
           </div>
         ): (
@@ -72,13 +123,37 @@ function Header() {
         <Modal isOpen={isOpen} className='max-w-lg w-[90%]
         p-6 absolute top-56 left-[50%] translate-x-[-50%]
         bg-white border-2 rounded-md shadow-md'
-        onRequestClose={() =>SetIsOpen(false)}
+        onRequestClose={() => SetIsOpen(false)}
         ariaHideApp={false}
         >
           <div className='flex flex-col justify-center
           items-center h-[100%]'>
-            <HiCamera className='text-4xl text-gray-400 
-            cursor-pointer'/>
+            {selectedFile ? (
+              <img 
+               src={imageFileUrl}
+               alt="selected file"
+               className={`max-h-[250px] w-full object-over cursor-pointer ${imageFileUploading ? 
+                'animate-pulse' : ''
+               }`}
+               onClick={() => setSelectedFile(null)}
+              />
+            ): (
+       
+                <HiCamera className='text-4xl text-gray-400 
+                cursor-pointer'
+                onClick={() => filePickerRef.current.click()}
+                />
+              )}
+                <input 
+                hidden 
+                ref={filePickerRef} 
+                type="file" 
+                accept='image/*'
+                onChange={addImageToPost}
+                />
+          
+
+
             <input type="text" maxLength={150}
              placeholder='Please enter you caption...'
              className='m-4 border-none text-center w-full
@@ -89,7 +164,7 @@ function Header() {
             hover:brightness-125 disabled:bg-gray-200 disabled:hover:brightness-100'>Upload Post</button>
             <AiOutlineClose className='cursor-pointer absolute top-2
             right-2 hover:text-red-600 transition duration-300'
-            onClick={() =>SetIsOpen(false)}
+            onClick={() => SetIsOpen(false)}
             />
           </div>
         </Modal>
