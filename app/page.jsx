@@ -12,7 +12,9 @@ export default function Home() {
 
      {/*MiniProfile (Right) */}
      <section className="hidden md:inline-grid">
-      <MiniProfile />
+      <div className="fixed w-[300]">
+       <MiniProfile />
+      </div>
      </section>
     </main>
   );
