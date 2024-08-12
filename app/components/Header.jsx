@@ -77,6 +77,7 @@ function Header() {
     setPostUploading(false)
     SetIsOpen(false)
     
+    location.reload()
   }
   return (
     <div className='shadow-sm border-b sticky
