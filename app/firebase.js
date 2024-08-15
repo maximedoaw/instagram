@@ -1,27 +1,25 @@
-
 // Import the functions you need from the SDKs you need
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: "insta-next-c67f2.firebaseapp.com",
-  projectId: "insta-next-c67f2",
-  storageBucket: "insta-next-c67f2.appspot.com",
-  messagingSenderId: "458500191217",
-  appId: "1:458500191217:web:5ae7c72be00609eb238a50"
+  authDomain: "insta-next-2df83.firebaseapp.com",
+  projectId: "insta-next-2df83",
+  storageBucket: "insta-next-2df83.appspot.com",
+  messagingSenderId: "69529002312",
+  appId: "1:69529002312:web:d211c1f7daf2cf4bc3937d"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app)
 const storage = getStorage(app)
+const db = getFirestore(app)
 
-export { db,storage }
+export { db,storage,app }
 // service firebase.storage {
 //     match /b/{bucket}/o {
 //       match /{allPaths=**} {

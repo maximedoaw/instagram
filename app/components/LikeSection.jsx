@@ -64,7 +64,7 @@ function LikeSection({ id }) {
         
       )
       }
-      
+  
     </div>
   )
 }
