@@ -1,6 +1,7 @@
-import Feed from "./components/Feed";
 import MiniProfile from "./components/MiniProfile";
 import Posts from "./components/Posts";
+
+export const dynamic = 'force-dynamic'
 
 export default function Home() {
   return (
